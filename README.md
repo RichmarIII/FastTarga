@@ -1,4 +1,4 @@
-# <center>**FastTarga**</center>
+# >**FastTarga**<-
 
 ### <center>*A Blazing Fast Implementation Of The Tru-Vision Targa Image Format Specification*</center>
 

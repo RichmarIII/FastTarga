@@ -35,7 +35,7 @@ Many Image Libraries Are Designed To Handle Many Different File Formats.  That H
 
 *Simply Import **FastTarga.py** Into Your Project*
 
->**Note:** *Make Sure That With Every Language, The Native **FastTarga.dll** C++ Library Is Located Where The Application Can Find It (Usually In The Same Directory As Your Application)*
+>**Note:** *Make Sure That With Every Language, The Native **FastTarga.dll** C++ Library Is Located Where The Application Can Find It (Usually In The Same Directory As Your Application).  For C++ Header-Only Builds, There Will Be No **FastTarga.dll***
 
 ### **Licence**
 #### BSD 2-Clause License ("FreeBSD") 

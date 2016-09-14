@@ -21,21 +21,21 @@ Many Image Libraries Are Designed To Handle Many Different File Formats.  That H
 
 #### **C++**
 
-*Simply Include The **TargaImage.h** Header File In Your Project*
+*Simply Include The __TargaImage.h__ Header File In Your Project*
 
 #### **C#**
 
-*Simply Add **FastTarga.Net.dll** As A Reference To Your Project*
+*Simply Add __FastTarga.Net.dll__ As A Reference To Your Project*
 
 #### **Java**
 
-*Simply Import **FastTarga.jar** Into Your Project*
+*Simply Import __FastTarga.jar__ Into Your Project*
 
 #### **Python**
 
-*Simply Import **FastTarga.py** Into Your Project*
+*Simply Import __FastTarga.py__ Into Your Project*
 
->**Note:** *Make Sure That With Every Language, The Native **FastTarga.dll** C++ Library Is Located Where The Application Can Find It (Usually In The Same Directory As Your Application).  For C++ Header-Only Builds, There Will Be No **FastTarga.dll***
+>**Note:** *Make Sure That With Every Language, The Native __FastTarga.dll__ C++ Library Is Located Where The Application Can Find It (Usually In The Same Directory As Your Application).  For C++ Header-Only Builds, There Will Be No __FastTarga.dll__*
 
 ### **Licence**
 #### BSD 2-Clause License ("FreeBSD") 

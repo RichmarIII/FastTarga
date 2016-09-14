@@ -4,6 +4,25 @@
 #include <stdint.h>
 #include <memory>
 
+
+
+#ifndef FASTTARGA_HEADERONLY
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 	When Set To Non 0. FastTarga Is Compiled In Header-Only Mode.  No DLL Is Produced.  When
+/// 	Compiling For Lanuage Wrappers, This Must Be Defined As 0.
+/// </summary>
+/// <remarks> Richard Gerard Marcoux III, September 14, 2016. </remarks>
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#define FASTTARGA_HEADERONLY 1
+
+#endif // !1
+
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>
 /// 	A Cross-Platform Targa Image Struct.  This Struct Implements The Targa Image File Format
@@ -16,6 +35,17 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 struct STargaImage
 {
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// <summary>
+	/// 	Loads The Specified Targa File And Returns An Instance Of The STargaImage Struct.
+	/// </summary>
+	/// <remarks> Richard Gerard Marcoux III, September 14, 2016. </remarks>
+	/// <param name="FilePath"> The Full FilePath Of The Targa Image You Want To Load. </param>
+	/// <returns> The Fully Loaded Targa Image. </returns>
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	static STargaImage Load( const char* FilePath );
+
 	struct SHeader
 	{
 		struct SColorMapSpecification
@@ -183,3 +213,16 @@ struct STargaImage
 	//Offset Into The pRawData Array That Points To The Footer.
 	SFooter* pFooter;
 };
+
+
+//"Inline" Implementation For Header-Only Builds 
+#if FASTTARGA_HEADERONLY
+
+
+/*static*/ STargaImage STargaImage::Load( const char* FilePath )
+{
+
+}
+
+
+#endif // FASTTARGA_HEADERONLY

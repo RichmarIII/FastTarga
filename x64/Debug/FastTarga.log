@@ -1,0 +1,2 @@
+﻿  TargaImage.cpp
+c:\repositories\hawkeyegames\fasttarga\targaimage.h(229): error C4716: 'STargaImage::Load': must return a value

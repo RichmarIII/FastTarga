@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include <memory>
+#include <fstream>
+#include <vector>
 
 
 
@@ -19,10 +21,6 @@
 
 #endif // !1
 
-
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>
 /// 	A Cross-Platform Targa Image Struct.  This Struct Implements The Targa Image File Format
@@ -33,8 +31,17 @@
 /// </summary>
 /// <remarks> Richard Gerard Marcoux III, September 13, 2016. </remarks>
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-struct STargaImage
+struct alignas( 1 ) STargaImage
 {
+	STargaImage();
+	~STargaImage();
+	STargaImage( STargaImage&& RHS );
+	STargaImage& operator=( STargaImage&& RHS );
+
+	STargaImage( STargaImage& RHS ) = delete;
+	STargaImage& operator=( const STargaImage& RHS ) = delete;
+
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// <summary>
@@ -46,22 +53,22 @@ struct STargaImage
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	static STargaImage Load( const char* FilePath );
 
-	struct SHeader
+	struct alignas( 1 ) SHeader
 	{
-		struct SColorMapSpecification
+		struct alignas( 1 ) SColorMapSpecification
 		{
 			uint16_t FirstEntryIndex;
 			uint16_t ColorMapLength;
 			uint8_t ColorMapEntrySize;
 		};
 
-		struct SImageSpecification
+		struct alignas( 1 ) SImageSpecification
 		{
 			uint16_t ImageXOrigin;
 			uint16_t ImageYOrigin;
 			uint16_t ImageWidth;
 			uint16_t ImageHeight;
-			uint8_t ImageDepth;
+			uint8_t ImageDepth; //Bits Per Pixel.
 			uint8_t ImageDescriptor; //Bits 0-3 Tells How Many Bits In Alpha Channel.  Bit 4 Tells If Left To Right Ordering.  Bit 5 Tells If Top To Bottom Ordering.  Bits 6-7 Must Be Zero.
 		};
 
@@ -72,21 +79,21 @@ struct STargaImage
 		SImageSpecification ImageSpec;
 	};
 
-	struct SData
+	struct alignas( 1 ) SData
 	{
 		uint8_t* ImageID;
 		uint8_t* ColorMapData;
-		uint8_t* ImageData;
+		uint8_t* ImageData; //Data Is Stored In BGRA Order.
 	};
 
-	struct SDeveloperArea
+	struct alignas( 1 ) SDeveloperArea
 	{
 		uint8_t* DeveloperData;
 	};
 
-	struct SDeveloperDirectory
+	struct alignas( 1 ) SDeveloperDirectory
 	{
-		struct STag
+		struct alignas( 1 ) STag
 		{
 			uint16_t Data;
 			uint32_t Offset;
@@ -97,9 +104,9 @@ struct STargaImage
 		STag* Tags;
 	};
 
-	struct SExtensionArea
+	struct alignas( 1 ) SExtensionArea
 	{
-		struct STimeStamp
+		struct alignas( 1 ) STimeStamp
 		{
 			uint16_t Month;
 			uint16_t Day;
@@ -109,20 +116,20 @@ struct STargaImage
 			uint16_t Second;
 		};
 
-		struct SJobTime
+		struct alignas( 1 ) SJobTime
 		{
 			uint16_t Hours;
 			uint16_t Minutes;
 			uint16_t Seconds;
 		};
 
-		struct SSoftwareVersion
+		struct alignas( 1 ) SSoftwareVersion
 		{
 			uint16_t VersionNumber;
-			char VersionLetter;
+			uint8_t VersionLetter;
 		};
 
-		struct SKeyColor
+		struct alignas( 1 ) SKeyColor
 		{
 			uint8_t A;
 			uint8_t R;
@@ -130,21 +137,21 @@ struct STargaImage
 			uint8_t B;
 		};
 
-		struct SPixelAspectRatio
+		struct alignas( 1 ) SPixelAspectRatio
 		{
 			uint16_t Width;
 			uint16_t Height;
 		};
 
-		struct SGammaValue
+		struct alignas( 1 ) SGammaValue
 		{
 			uint16_t Numerator;
 			uint16_t Denominator;
 		};
 
-		struct SColorCorrectionTable
+		struct alignas( 1 ) SColorCorrectionTable
 		{
-			struct SColor
+			struct alignas( 1 ) SColor
 			{
 				uint16_t A;
 				uint16_t R;
@@ -156,18 +163,21 @@ struct STargaImage
 		};
 
 		uint16_t ExtensionSize;
-		char AuthorName[ 41 ];
-		char AuthorComments[ 324 ];
+		uint8_t AuthorName[ 41 ];
+		uint8_t AuthorComments[ 324 ];
 		STimeStamp TimeStamp;
-		char JobName[ 41 ];
+		uint8_t JobName[ 41 ];
 		SJobTime JobTime;
-		char SoftwareID[ 41 ];
+		uint8_t SoftwareID[ 41 ];
 		SSoftwareVersion SoftwareVersion;
 		SKeyColor KeyColor;
 		SPixelAspectRatio PixelAspectRatio;
 		SGammaValue GammaValue;
 		uint32_t ColorCorrectionOffset;
 		uint32_t PostageStampOffset;
+		uint8_t Padding5;
+		uint8_t Padding6;
+		uint8_t Padding7;
 		uint32_t ScanLineOffset;
 		uint8_t AttributesType;
 		uint8_t* pScanLineTable;
@@ -175,26 +185,26 @@ struct STargaImage
 		SColorCorrectionTable ColorCorrectioinTable;
 	};
 
-	struct SFooter
+	struct alignas( 1 ) SFooter
 	{
 		uint32_t ExtensionAreaOffset;
 		uint32_t DeveloperDictionaryOffset;
-		char Signature[ 16 ];
-		char Reserved; //Must Contain A Period '.'.
+		uint8_t Signature[ 16 ];
+		uint8_t Reserved; //Must Contain A Period '.'.
 		uint8_t BinaryZeroStringTerminator;
 	};
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// <summary>
-	/// 	Dynamically Allocated Array That Holds All Data From The Targa File.  This Is The Only
-	/// 	Member That Actually Owns Any Memory.  All Other Member Pointers Are Simply
-	/// 	Aliases/Offsets To Portions Of This Data.  This Allows Blazing Fast Memory Access And
-	/// 	Keeps The Memory Footprint To The Absolute Minimum.  Make Sure To Allocate The Needed
-	/// 	Memory For This Member To Hold All Data In The Targa File.
+	/// 	Array That Holds All Data From The Targa File.  This Is The Only Member That Actually
+	/// 	Owns Any Memory.  All Other Member Pointers Are Simply Aliases/Offsets To Portions Of
+	/// 	This Data.  This Allows Blazing Fast Memory Access And Keeps The Memory Footprint To The
+	/// 	Absolute Minimum.  Make Sure To Allocate The Needed Memory For This Member To Hold All
+	/// 	Data In The Targa File.
 	/// </summary>
 	////////////////////////////////////////////////////////////////////////////////////////////////////
-	std::unique_ptr<uint8_t> RawData;
-	
+	std::vector<uint8_t> RawData;
+
 	//Offset Into The pRawData Array That Points To The Header.
 	SHeader* pHeader;
 
@@ -205,7 +215,7 @@ struct STargaImage
 	SDeveloperDirectory* pDeveloperDirectory;
 
 	//Offset Into The pRawData Array That Points To The Image Area.
-	SData* pImageArea;
+	SData ImageArea;
 
 	//Offset Into The pRawData Array That Points To The Extension Data.
 	SExtensionArea* pExtensionArea;
@@ -219,9 +229,94 @@ struct STargaImage
 #if FASTTARGA_HEADERONLY
 
 
-/*static*/ STargaImage STargaImage::Load( const char* FilePath )
+STargaImage::STargaImage() :
+	pHeader( nullptr ),
+	pDeveloperArea( nullptr ),
+	pDeveloperDirectory( nullptr ),
+	ImageArea( { 0 } ),
+	pExtensionArea( nullptr ),
+	pFooter( nullptr )
 {
 
+}
+
+
+
+
+STargaImage::~STargaImage()
+{
+
+}
+
+
+
+
+STargaImage::STargaImage( STargaImage&& RHS ) :
+	RawData( std::move( RHS.RawData ) ),
+	pHeader( std::move( RHS.pHeader ) ),
+	pDeveloperArea( std::move( RHS.pDeveloperArea ) ),
+	pDeveloperDirectory( std::move( RHS.pDeveloperDirectory ) ),
+	ImageArea( std::move( RHS.ImageArea ) ),
+	pExtensionArea( std::move( RHS.pExtensionArea ) ),
+	pFooter( std::move( RHS.pFooter ) )
+{
+	RHS.RawData.clear();
+	RHS.pHeader = nullptr;
+	RHS.pDeveloperArea = nullptr;
+	RHS.pDeveloperDirectory = nullptr;
+	RHS.pExtensionArea = nullptr;
+	RHS.ImageArea = { 0 };
+}
+
+
+
+
+STargaImage& STargaImage::operator=( STargaImage&& RHS )
+{
+	RawData = std::move( RHS.RawData );
+	pHeader = std::move( RHS.pHeader );
+	pDeveloperArea = std::move( RHS.pDeveloperArea );
+	pDeveloperDirectory = std::move( RHS.pDeveloperDirectory );
+	ImageArea = std::move( RHS.ImageArea );
+	pExtensionArea = std::move( RHS.pExtensionArea );
+	pFooter = std::move( RHS.pFooter );
+
+	RHS.RawData.clear();
+	RHS.pHeader = nullptr;
+	RHS.pDeveloperArea = nullptr;
+	RHS.pDeveloperDirectory = nullptr;
+	RHS.pExtensionArea = nullptr;
+	RHS.ImageArea = { 0 };
+
+	return *this;
+}
+
+
+
+
+/*static*/ STargaImage STargaImage::Load( const char* FilePath )
+{
+	STargaImage Image;
+
+	//Read In Entire Targa File.
+	Image.RawData = std::vector<uint8_t>( std::istreambuf_iterator<uint8_t>( std::basic_ifstream<uint8_t>( FilePath, std::ios_base::binary ) ), std::istreambuf_iterator<uint8_t>() );
+
+	//Set The Header Pointer....Header Is Always The First 18 Bytes Of The File.
+	Image.pHeader = ( SHeader* ) &Image.RawData[ 0 ];
+
+	//We Don't Support ColorMapped, Black And White, Or Compressed Images....Yet.
+	if( Image.pHeader->ImageType != 2 /*UnCompressed True Color*/ )
+		return STargaImage();
+
+	//Set The Image Data Pointer....Image Data Comes After Pointer
+	Image.ImageArea.ImageData = ( &Image.RawData[ 0 ] ) + sizeof( SHeader );
+
+	//Set The Footer Pointer....Footer Is Always The Last 26 Bytes Of The File.
+	Image.pFooter = ( SFooter* ) ( ( &Image.RawData[ 0 ] ) + ( Image.RawData.size() - 26 ) );
+	if( strcmp( ( const char* ) Image.pFooter->Signature, "TRUEVISION-XFILE" ) != 0 )
+		Image.pFooter = nullptr;//No Footer....Targa Is Version 1.
+
+	return std::move( Image );
 }
 
 

@@ -5,9 +5,9 @@
 /*.*
 
 #Allow These Directories
-!Project/
-!Source/
-!stylesheets/
+!Project/*.*
+!Source/*.*
+!stylesheets/*.*
 
 #Allow These Files
 !.gitignore

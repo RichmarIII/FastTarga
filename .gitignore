@@ -9,6 +9,8 @@
 !Source/*.*
 !stylesheets/*.*
 
+Project/*/*
+
 #Allow These Files
 !.gitignore
 !index.html

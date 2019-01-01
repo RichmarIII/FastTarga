@@ -17,7 +17,7 @@
 /// </summary>
 /// <remarks> Richard Gerard Marcoux III, September 14, 2016. </remarks>
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#define FASTTARGA_HEADERONLY 1
+#define FASTTARGA_HEADERONLY 0
 
 #endif // !1
 

@@ -1,6 +1,20 @@
+#Ignore All Directories
+*/*
 
-\.vs
-/**/Temp/
+#Ignore Files In Current Directory
+/*.*
+
+#Allow These Directories
+!Project/
+!Source/
+!stylesheets/
+
+#Allow These Files
+!.gitignore
+!index.html
+!License.txt
+!README.md
+!params.json
 
 *.dll
 *.ilk
@@ -14,3 +28,4 @@
 *.tlog
 *.lastbuildstate
 unsuccessfulbuild
+

@@ -1,6 +1,6 @@
 
 \.vs
-\**\Temp
+/**/Temp/
 
 *.dll
 *.ilk

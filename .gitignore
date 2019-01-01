@@ -1,0 +1,16 @@
+
+\.vs
+/**/Temp/
+
+*.dll
+*.ilk
+*.lib
+*.exe
+*.pdb
+*.idb
+*.vcxproj.user
+*.vcxproj.filters
+*.VC.db
+*.tlog
+*.lastbuildstate
+unsuccessfulbuild

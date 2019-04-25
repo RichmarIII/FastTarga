@@ -167,6 +167,10 @@
   <ItemGroup>
     <ClCompile Include="..\Source\TargaImage.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="FastTarga.i" />
+    <None Include="BuildWrappers.sh" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -28,20 +28,44 @@ STargaImage::~STargaImage()
 
 
 STargaImage::STargaImage(STargaImage&& RHS) :
-	RawData(std::move(RHS.RawData)),
-	pHeader(std::move(RHS.pHeader)),
-	pDeveloperArea(std::move(RHS.pDeveloperArea)),
-	pDeveloperDirectory(std::move(RHS.pDeveloperDirectory)),
-	ImageArea(std::move(RHS.ImageArea)),
-	pExtensionArea(std::move(RHS.pExtensionArea)),
-	pFooter(std::move(RHS.pFooter))
+    RawData(std::move(RHS.RawData)),
+    pHeader(std::move(RHS.pHeader)),
+    pDeveloperArea(std::move(RHS.pDeveloperArea)),
+    pDeveloperDirectory(std::move(RHS.pDeveloperDirectory)),
+    ImageArea(std::move(RHS.ImageArea)),
+    pExtensionArea(std::move(RHS.pExtensionArea)),
+    pFooter(std::move(RHS.pFooter))
 {
-	RHS.RawData.clear();
-	RHS.pHeader = nullptr;
-	RHS.pDeveloperArea = nullptr;
-	RHS.pDeveloperDirectory = nullptr;
-	RHS.pExtensionArea = nullptr;
-	RHS.ImageArea = { 0 };
+    RHS.RawData.clear();
+    RHS.pHeader = nullptr;
+    RHS.pDeveloperArea = nullptr;
+    RHS.pDeveloperDirectory = nullptr;
+    RHS.pExtensionArea = nullptr;
+    RHS.ImageArea = { 0 };
+}
+
+
+
+
+STargaImage::STargaImage(const STargaImage& RHS) :
+    RawData(RHS.RawData),
+    pHeader(nullptr),
+    pDeveloperArea(nullptr),
+    pDeveloperDirectory(nullptr),
+    ImageArea({ 0 }),
+    pExtensionArea(nullptr),
+    pFooter(nullptr)
+{
+    //Set The Header Pointer....Header Is Always The First 18 Bytes Of The File.
+    this->pHeader = (SHeader*)&this->RawData[0];
+
+    //Set The Image Data Pointer....Image Data Comes After Header.
+    this->ImageArea.ImageData = (&this->RawData[0]) + sizeof(SHeader);
+
+    //Set The Footer Pointer....Footer Is Always The Last 26 Bytes Of The File.
+    this->pFooter = (SFooter*)((&this->RawData[0]) + (this->RawData.size() - 26));
+    if (strncmp((const char*)this->pFooter->Signature, "TRUEVISION-XFILE", sizeof(this->pFooter->Signature)) != 0)
+        this->pFooter = nullptr;//No Footer....Targa Is Version 1.
 }
 
 
@@ -49,24 +73,45 @@ STargaImage::STargaImage(STargaImage&& RHS) :
 
 STargaImage& STargaImage::operator=(STargaImage&& RHS)
 {
-	RawData = std::move(RHS.RawData);
-	pHeader = std::move(RHS.pHeader);
-	pDeveloperArea = std::move(RHS.pDeveloperArea);
-	pDeveloperDirectory = std::move(RHS.pDeveloperDirectory);
-	ImageArea = std::move(RHS.ImageArea);
-	pExtensionArea = std::move(RHS.pExtensionArea);
-	pFooter = std::move(RHS.pFooter);
+    RawData = std::move(RHS.RawData);
+    pHeader = std::move(RHS.pHeader);
+    pDeveloperArea = std::move(RHS.pDeveloperArea);
+    pDeveloperDirectory = std::move(RHS.pDeveloperDirectory);
+    ImageArea = std::move(RHS.ImageArea);
+    pExtensionArea = std::move(RHS.pExtensionArea);
+    pFooter = std::move(RHS.pFooter);
 
-	RHS.RawData.clear();
-	RHS.pHeader = nullptr;
-	RHS.pDeveloperArea = nullptr;
-	RHS.pDeveloperDirectory = nullptr;
-	RHS.pExtensionArea = nullptr;
-	RHS.ImageArea = { 0 };
+    RHS.RawData.clear();
+    RHS.pHeader = nullptr;
+    RHS.pDeveloperArea = nullptr;
+    RHS.pDeveloperDirectory = nullptr;
+    RHS.pExtensionArea = nullptr;
+    RHS.ImageArea = { 0 };
 
-	return *this;
+    return *this;
 }
 
+
+
+
+STargaImage& STargaImage::operator=(const STargaImage& RHS)
+{
+    //Copy Data From Other Image.
+    this->RawData = RHS.RawData;
+
+    //Set The Header Pointer....Header Is Always The First 18 Bytes Of The File.
+    this->pHeader = (SHeader*)&this->RawData[0];
+
+    //Set The Image Data Pointer....Image Data Comes After Header.
+    this->ImageArea.ImageData = (&this->RawData[0]) + sizeof(SHeader);
+
+    //Set The Footer Pointer....Footer Is Always The Last 26 Bytes Of The File.
+    this->pFooter = (SFooter*)((&this->RawData[0]) + (this->RawData.size() - 26));
+    if (strncmp((const char*)this->pFooter->Signature, "TRUEVISION-XFILE", sizeof(this->pFooter->Signature)) != 0)
+        this->pFooter = nullptr;//No Footer....Targa Is Version 1.
+        
+    return *this;
+}
 
 
 

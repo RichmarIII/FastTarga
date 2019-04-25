@@ -10,6 +10,12 @@
 #include <algorithm>
 
 
+#if SWIG
+#define ALIGNAS(a)
+#else
+#define ALIGNAS(a) alignas(a)
+#endif //!SWIG
+
 
 #ifndef FASTTARGA_HEADERONLY
 
@@ -22,7 +28,12 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #define FASTTARGA_HEADERONLY 0
 
-#endif // !1
+#endif // !FASTTARGA_HEADERONLY
+
+
+//Force Minimum Struct Alignment To 1 Byte.
+#pragma pack(push, 1)
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>
@@ -34,17 +45,15 @@
 /// </summary>
 /// <remarks> Richard Gerard Marcoux III, September 13, 2016. </remarks>
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-struct alignas(1) STargaImage
+struct ALIGNAS(1) STargaImage
 {
 	STargaImage();
 	~STargaImage();
+    
 	STargaImage(STargaImage&& RHS);
-	STargaImage& operator=(STargaImage&& RHS);
-
-	STargaImage(STargaImage& RHS) = delete;
-	STargaImage& operator=(const STargaImage& RHS) = delete;
-
-
+	STargaImage& operator=(STargaImage&& RHS); 
+	STargaImage(const STargaImage& RHS);
+	STargaImage& operator=(const STargaImage& RHS);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// <summary>
@@ -67,16 +76,16 @@ struct alignas(1) STargaImage
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	static void Save( const STargaImage& Image, const char* szFilePath);
 
-	struct alignas(1) SHeader
+	struct ALIGNAS(1) SHeader
 	{
-		struct alignas(1) SColorMapSpecification
+		struct ALIGNAS(1) SColorMapSpecification
 		{
 			uint16_t FirstEntryIndex;
 			uint16_t ColorMapLength;
 			uint8_t ColorMapEntrySize;
 		};
 
-		struct alignas(1) SImageSpecification
+		struct ALIGNAS(1) SImageSpecification
 		{
 			uint16_t ImageXOrigin;
 			uint16_t ImageYOrigin;
@@ -93,21 +102,21 @@ struct alignas(1) STargaImage
 		SImageSpecification ImageSpec;
 	};
 
-	struct alignas(1) SData
+	struct ALIGNAS(1) SData
 	{
 		uint8_t* ImageID;
 		uint8_t* ColorMapData;
 		uint8_t* ImageData; //Data Is Stored In BGRA Order.
 	};
 
-	struct alignas(1) SDeveloperArea
+	struct ALIGNAS(1) SDeveloperArea
 	{
 		uint8_t* DeveloperData;
 	};
 
-	struct alignas(1) SDeveloperDirectory
+	struct ALIGNAS(1) SDeveloperDirectory
 	{
-		struct alignas(1) STag
+		struct ALIGNAS(1) STag
 		{
 			uint16_t Data;
 			uint32_t Offset;
@@ -118,9 +127,9 @@ struct alignas(1) STargaImage
 		STag* Tags;
 	};
 
-	struct alignas(1) SExtensionArea
+	struct ALIGNAS(1) SExtensionArea
 	{
-		struct alignas(1) STimeStamp
+		struct ALIGNAS(1) STimeStamp
 		{
 			uint16_t Month;
 			uint16_t Day;
@@ -130,20 +139,20 @@ struct alignas(1) STargaImage
 			uint16_t Second;
 		};
 
-		struct alignas(1) SJobTime
+		struct ALIGNAS(1) SJobTime
 		{
 			uint16_t Hours;
 			uint16_t Minutes;
 			uint16_t Seconds;
 		};
 
-		struct alignas(1) SSoftwareVersion
+		struct ALIGNAS(1) SSoftwareVersion
 		{
 			uint16_t VersionNumber;
 			uint8_t VersionLetter;
 		};
 
-		struct alignas(1) SKeyColor
+		struct ALIGNAS(1) SKeyColor
 		{
 			uint8_t A;
 			uint8_t R;
@@ -151,21 +160,21 @@ struct alignas(1) STargaImage
 			uint8_t B;
 		};
 
-		struct alignas(1) SPixelAspectRatio
+		struct ALIGNAS(1) SPixelAspectRatio
 		{
 			uint16_t Width;
 			uint16_t Height;
 		};
 
-		struct alignas(1) SGammaValue
+		struct ALIGNAS(1) SGammaValue
 		{
 			uint16_t Numerator;
 			uint16_t Denominator;
 		};
 
-		struct alignas(1) SColorCorrectionTable
+		struct ALIGNAS(1) SColorCorrectionTable
 		{
-			struct alignas(1) SColor
+			struct ALIGNAS(1) SColor
 			{
 				uint16_t A;
 				uint16_t R;
@@ -199,7 +208,7 @@ struct alignas(1) STargaImage
 		SColorCorrectionTable ColorCorrectioinTable;
 	};
 
-	struct alignas(1) SFooter
+	struct ALIGNAS(1) SFooter
 	{
 		uint32_t ExtensionAreaOffset;
 		uint32_t DeveloperDictionaryOffset;
@@ -285,6 +294,30 @@ STargaImage::STargaImage(STargaImage&& RHS) :
 
 
 
+STargaImage::STargaImage(const STargaImage& RHS) :
+    RawData(RHS.RawData),
+    pHeader(nullptr),
+    pDeveloperArea(nullptr),
+    pDeveloperDirectory(nullptr),
+    ImageArea({ 0 }),
+    pExtensionArea(nullptr),
+    pFooter(nullptr)
+{
+    //Set The Header Pointer....Header Is Always The First 18 Bytes Of The File.
+    this->pHeader = (SHeader*)&this->RawData[0];
+
+    //Set The Image Data Pointer....Image Data Comes After Header.
+    this->ImageArea.ImageData = (&this->RawData[0]) + sizeof(SHeader);
+
+    //Set The Footer Pointer....Footer Is Always The Last 26 Bytes Of The File.
+    this->pFooter = (SFooter*)((&this->RawData[0]) + (this->RawData.size() - 26));
+    if (strncmp((const char*)this->pFooter->Signature, "TRUEVISION-XFILE", sizeof(this->pFooter->Signature)) != 0)
+        this->pFooter = nullptr;//No Footer....Targa Is Version 1.
+}
+
+
+
+
 STargaImage& STargaImage::operator=(STargaImage&& RHS)
 {
 	RawData = std::move(RHS.RawData);
@@ -303,6 +336,28 @@ STargaImage& STargaImage::operator=(STargaImage&& RHS)
 	RHS.ImageArea = { 0 };
 
 	return *this;
+}
+
+
+
+
+STargaImage& STargaImage::operator=(const STargaImage& RHS)
+{
+    //Copy Data From Other Image.
+    this->RawData = RHS.RawData;
+
+    //Set The Header Pointer....Header Is Always The First 18 Bytes Of The File.
+    this->pHeader = (SHeader*)&this->RawData[0];
+
+    //Set The Image Data Pointer....Image Data Comes After Header.
+    this->ImageArea.ImageData = (&this->RawData[0]) + sizeof(SHeader);
+
+    //Set The Footer Pointer....Footer Is Always The Last 26 Bytes Of The File.
+    this->pFooter = (SFooter*)((&this->RawData[0]) + (this->RawData.size() - 26));
+    if (strncmp((const char*)this->pFooter->Signature, "TRUEVISION-XFILE", sizeof(this->pFooter->Signature)) != 0)
+        this->pFooter = nullptr;//No Footer....Targa Is Version 1.
+        
+    return *this;
 }
 
 
@@ -382,6 +437,9 @@ STargaImage& STargaImage::operator=(STargaImage&& RHS)
 		FileStream.write((char*)&Footer, sizeof(SFooter));
 	}
 }
+
+
+#pragma pack(pop)
 
 
 #endif // FASTTARGA_HEADERONLY

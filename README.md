@@ -9,7 +9,7 @@ A Blazing Fast Image Library Implemented Is C++ That Is Able To Read And Write T
 
 ### **Why FastTarga?**
 
-Many Image Libraries Are Designed To Handle Many Different File Formats.  That Has It's Advantages For Sure, But It Also Has It's Draw Backs.  When Dealing With Libraries That Cater To Many Formats, The Library Has To Be Written And Designed With The Lowest Common Denominator Center Stage.  This Often Leads To Many Or Most Features Of A File Format To Be Completely Missing, Choosing To Only Implement Support For Reading And Writing Actual Pixel Data.  The Targa File Format, As Well As Many Others, Can Actually Describe More Information  Than Simply Pixel Data Such As Author Name, Thumbnails, Application-Specific User Data, And More.   Below Is A List Of Advantages Of Using **FastTarga**
+Many Image Libraries Are Designed To Handle Many Different File Formats.  That Has It's Advantages For Sure, But It Also Has It's Draw Backs.  When Dealing With Libraries That Cater To Many Formats, The Library Has To Be Written And Designed With The Lowest Common Denominator Center Stage.  This Often Leads To Many Or Most Features Of A File Format To Be Completely Missing, Choosing To Only Implement Support For Reading And Writing Actual Pixel Data.  The Targa File Format, As Well As Many Others, Can Actually Describe More Information Than Simply Pixel Data Such As Author Name, Thumbnails, Application-Specific User Data, And More.   Below Is A List Of Advantages Of Using **FastTarga**
 
  + *Full Specification Compliance For All Versions Including The Latest, Version 2.0*
  + *Full Support For All Specification Features Such As Developer And Extension Areas*
@@ -40,7 +40,7 @@ Many Image Libraries Are Designed To Handle Many Different File Formats.  That H
 ### **Licence**
 #### BSD 2-Clause License ("FreeBSD") 
 
->Copyright (c) 2016, Precision Software & Entertainment LLC (Richard Gerard Marcoux III)
+>Copyright (c) 2016, Precision Software & Engineering LLC (Richard Gerard Marcoux III)
 All rights reserved.
 
 >Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
